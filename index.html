@@ -1,2 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>债券评级系统</title>
+    <style>
+        body {
+            font-family: Microsoft YaHei;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
 
-<h1>INDEX</h1>
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
+
+        .bond-title {
+            color: #ffd700;
+            font-size: 18px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .left-panel {
+            width: 300px;
+            background-color: #051E1D;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #30363d;
+        }
+
+        .right-panel {
+            flex: 1;
+            background-color: #051E1D;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #30363d;
+        }
+
+        .rating-form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #8b949e;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            border-radius: 4px;
+        }
+
+        .rating-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .rating-table th,
+        .rating-table td {
+            padding: 10px;
+            border: 1px solid #30363d;
+            text-align: left;
+        }
+
+        .rating-table th {
+            background-color: #161b22;
+            color: #8b949e;
+        }
+
+        .submit-btn {
+            background-color: #238636;
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid rgba(240,246,252,0.1);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #2ea043;
+        }
+
+        /* 添加必填项标记样式 */
+        .required::after {
+            content: '*';
+            color: #f85149;
+            margin-left: 4px;
+        }
+        
+        /* 添加只读输入框样式 */
+        .form-control[readonly] {
+            background-color: #21262d;
+            color: #8b949e;
+            cursor: not-allowed;
+        }
+        
+        /* 添加表单行内布局 */
+        .form-inline {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        /* 添加小标签样式 */
+        .tag {
+            padding: 2px 8px;
+            background: #21262d;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        /* 评级状态颜色 */
+        .rating-status {
+            color: #f85149;
+        }
+        .rating-status.good {
+            color: #3fb950;
+        }
+        .rating-status.warning {
+            color: #f0883e;
+        }
+
+        /* 顶部导航栏样式 */
+        .nav-container {
+            background-color: #005457;
+            border-bottom: 1px solid #30363d;
+            padding: 0;
+            margin: -20px -20px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            color: #FFE3B3;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 0 20px;
+            line-height: 32px;
+            border-right: 1px solid #30363d;
+        }
+
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .nav-tabs li {
+            padding: 10px 15px;
+            height: 32px;
+            line-height: 32px;
+            padding: 0 15px;
+            color: #FFE3B3;
+            cursor: pointer;
+            border-right: 1px solid #30363d;
+            border-bottom: 1px solid #30363d;
+            box-sizing: border-box;
+        }
+
+        .nav-tabs li.active {
+            color: #c9d1d9;
+            background-color: #0d1117;
+            border-bottom: 2px solid #f78166;
+        }
+
+        /* 左侧边栏样式 */
+        .sidebar {
+            width: 200px;
+            background-color: #063138;
+            border-right: 1px solid #30363d;
+            padding: 15px 0;
+            margin: -20px 0 -20px -20px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            padding: 10px 20px;
+            color: #FFE3B3;
+            cursor: pointer;
+        }
+
+        .sidebar-menu li:hover {
+            background-color: #21262d;
+        }
+
+        .sidebar-menu li.active {
+            color: #c9d1d9;
+            background-color: #21262d;
+            border-left: 2px solid #f78166;
+        }
+
+        /* 调整主容器布局 */
+        .page-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* 添加新的样式 */
+        .table-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #FFE3B3;
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        /* 调整表格样式以适应新布局 */
+        .rating-table {
+            margin-bottom: 20px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 添加新行的高亮效果 */
+        .new-row {
+            animation: highlight 2s ease-out;
+        }
+
+        @keyframes highlight {
+            0% {
+                background-color: rgba(35, 134, 54, 0.2);
+            }
+            100% {
+                background-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="nav-container">
+        <a href="#" class="logo">qeubee</a>
+        <ul class="nav-tabs">
+            <li>号码</li>
+            <li>ABS证券池</li>
+            <li>资金合约</li>
+            <li>成交明细</li>
+            <li>债权合约</li>
+            <li>利率指标</li>
+            <li>X-Swap</li>
+            <li>国际货币</li>
+            <li>专题统计</li>
+            <li>聚焦池</li>
+            <li>银行行情</li>
+            <li>资金日历</li>
+            <li>CTD监控</li>
+            <li>上证基准指数</li>
+            <li>24H现汇14</li>
+            <li class="active">22华实14C</li>
+            <li>24特殊05</li>
+            <li>指数管理</li>
+            <li>债市日历</li>
+            <li>qeubee live</li>
+        </ul>
+    </div>
+
+    <div class="page-container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li>外汇日历</li>
+                <li>全球市场概览</li>
+                <li>华尔街观点</li>
+                <li>利率债走势</li>
+                <li>市场热点</li>
+                <li>资讯评级汇总</li>
+                <li>主体预期</li>
+                <li class="active">债券资料</li>
+                <li>基础资料</li>
+                <li>经纪商日内</li>
+                <li>历史行情</li>
+                <li>个券估值</li>
+                <li>一级发行</li>
+                <li>相似二级</li>
+                <li>评级与事件</li>
+                <li>发行人数据</li>
+                <li>发行人配置</li>
+                <li>主体信息</li>
+                <li>关系图谱</li>
+                <li>评级数据</li>
+                <li>同发行人债券</li>
+                <li>曲线特征</li>
+                <li>公司</li>
+                <li>舆情热点</li>
+                <li>法律诉讼</li>
+                <li>外部评级</li>
+                <li>机构持仓</li>
+            </ul>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="content-container">
+            <div class="header">
+                <h1 class="bond-title">22华实14C(黑池) S09858.IB</h1>
+            </div>
+
+            <div class="main-container">
+                <div class="left-panel">
+                    <div class="rating-form">
+                        <!-- 发行人信息 -->
+                        <div class="form-group">
+                            <label class="required">发行人名称</label>
+                            <div class="form-inline">
+                                <input type="text" class="form-control" value="20华实14C(黑池) S09858.IB" readonly>
+                                <span class="tag">武汉</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>上次主体评级</label>
+                            <div class="form-inline">
+                                <input type="text" class="form-control" value="AA" readonly>
+                                <input type="text" class="form-control" value="李小明" readonly>
+                                <input type="date" class="form-control" value="2025-01-20" readonly>
+                            </div>
+                        </div>
+
+                        <!-- 评级表单 -->
+                        <div class="form-group">
+                            <label class="required">本次债项评级</label>
+                            <select class="form-control" name="rating">
+                                <option value="">请选择</option>
+                                <option value="AAA">AAA</option>
+                                <option value="AA+">AA+</option>
+                                <option value="AA">AA</option>
+                                <option value="AA-">AA-</option>
+                                <option value="A+">A+</option>
+                                <option value="不建议">不建议</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="required">信评组</label>
+                            <select class="form-control">
+                                <option value="">请选择</option>
+                                <option value="1">第一信评组</option>
+                                <option value="2">第二信评组</option>
+                                <option value="3">第三信评组</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="required">评级说明</label>
+                            <textarea class="form-control" rows="4" placeholder="请输入评级说明" name="ratingDesc"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="required">本次评级日期</label>
+                            <input type="date" class="form-control" value="2024-01-01" name="ratingDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="required">本次信评人员</label>
+                            <input type="text" class="form-control" value="李小明" readonly name="rater">
+                        </div>
+
+                        <button type="submit" class="submit-btn">提交评级</button>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <!-- 债券历史信评表格 -->
+                    <div class="table-section">
+                        <h3 class="section-title">债券历史信评</h3>
+                        <table class="rating-table">
+                            <thead>
+                                <tr>
+                                    <th>评级日期</th>
+                                    <th>债项评级</th>
+                                    <th>评级人员</th>
+                                    <th>评级说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 新添加的数据行，模拟提交后的效果 -->
+                                <tr class="new-row">
+                                    <td>2024/01/01</td>
+                                    <td class="rating-status warning">AA-</td>
+                                    <td>李小明</td>
+                                    <td>最新提交的评级说明内容。公司经营状况良好，但存在一定的风险因素...</td>
+                                </tr>
+                                <!-- 原有数据，保持前4行 -->
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status">不建议</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status good">AA</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status good">AA+</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status warning">AA-</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 发行人历史信评表格 -->
+                    <div class="table-section">
+                        <h3 class="section-title">发行人历史信评</h3>
+                        <table class="rating-table">
+                            <thead>
+                                <tr>
+                                    <th>评级日期</th>
+                                    <th>主体评级</th>
+                                    <th>评级人员</th>
+                                    <th>评级说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status good">AA+</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status good">AA</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status good">AA+</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status">不建议</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/01/01</td>
+                                    <td class="rating-status warning">A+</td>
+                                    <td>李小明</td>
+                                    <td>公司股权分散，最大持股东为无锡城市发展集团有限公司，持股31.20%。公司是无锡大型新城中心的唯一一家建设运营主体，本...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.rating-form');
+            const bondHistoryTable = document.querySelector('.table-section:first-child .rating-table tbody');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 获取表单数据
+                const rating = form.querySelector('select[name="rating"]').value;
+                const ratingDesc = form.querySelector('textarea[name="ratingDesc"]').value;
+                const ratingDate = form.querySelector('input[name="ratingDate"]').value;
+                const rater = form.querySelector('input[name="rater"]').value;
+                
+                // 验证必填字段
+                if (!rating || !ratingDesc || !ratingDate) {
+                    alert('请填写所有必填项');
+                    return;
+                }
+                
+                // 创建新行
+                const newRow = document.createElement('tr');
+                
+                // 设置评级状态的CSS类
+                let ratingStatusClass = 'rating-status';
+                if (['AA', 'AA+', 'AAA'].includes(rating)) {
+                    ratingStatusClass += ' good';
+                } else if (['A+', 'AA-'].includes(rating)) {
+                    ratingStatusClass += ' warning';
+                }
+                
+                // 设置行内容
+                newRow.innerHTML = `
+                    <td>${formatDate(ratingDate)}</td>
+                    <td class="${ratingStatusClass}">${rating}</td>
+                    <td>${rater}</td>
+                    <td>${ratingDesc}</td>
+                `;
+                
+                // 在表格顶部插入新行
+                bondHistoryTable.insertBefore(newRow, bondHistoryTable.firstChild);
+                
+                // 如果行数超过5行，删除最后一行
+                if (bondHistoryTable.children.length > 5) {
+                    bondHistoryTable.removeChild(bondHistoryTable.lastChild);
+                }
+                
+                // 重置表单
+                form.reset();
+            });
+            
+            // 日期格式化函数
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+            }
+        });
+    </script>
+</body>
+</html> 
